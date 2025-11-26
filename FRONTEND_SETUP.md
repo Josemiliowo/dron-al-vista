@@ -237,10 +237,10 @@ El frontend espera recibir del backend:
 // Drone
 {
   drone_id: "DRN-001",
+  name: "Halcón 1",
   lat: 19.4326,
   lon: -99.1332,
   alt: 120,
-  speed: 15,
   timestamp: 1234567890
 }
 

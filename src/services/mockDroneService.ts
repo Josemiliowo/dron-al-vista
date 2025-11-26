@@ -1,10 +1,10 @@
 // Mock service to simulate drone data from UART/WebSocket
 export interface DroneData {
   drone_id: string;
+  name: string;
   lat: number;
   lon: number;
   alt: number;
-  speed: number;
   timestamp: Date;
   trail: [number, number][];
 }
@@ -68,30 +68,30 @@ export class MockDroneService {
     // Initialize drones with trails
     this.drones.set('DRN-001', {
       drone_id: 'DRN-001',
+      name: 'Halcón 1',
       lat: 19.4326,
       lon: -99.1332,
       alt: 120,
-      speed: 15,
       timestamp: new Date(),
       trail: [[19.4326, -99.1332]]
     });
 
     this.drones.set('DRN-002', {
       drone_id: 'DRN-002',
+      name: 'Águila 2',
       lat: 19.4280,
       lon: -99.1450,
       alt: 85,
-      speed: 22,
       timestamp: new Date(),
       trail: [[19.4280, -99.1450]]
     });
 
     this.drones.set('DRN-003', {
       drone_id: 'DRN-003',
+      name: 'Cóndor 3',
       lat: 19.4400,
       lon: -99.1250,
       alt: 150,
-      speed: 18,
       timestamp: new Date(),
       trail: [[19.4400, -99.1250]]
     });
@@ -116,12 +116,10 @@ export class MockDroneService {
       const deltaLat = (Math.random() - 0.5) * 0.002;
       const deltaLon = (Math.random() - 0.5) * 0.002;
       const deltaAlt = (Math.random() - 0.5) * 10;
-      const deltaSpeed = (Math.random() - 0.5) * 5;
 
       drone.lat += deltaLat;
       drone.lon += deltaLon;
       drone.alt = Math.max(50, Math.min(200, drone.alt + deltaAlt));
-      drone.speed = Math.max(5, Math.min(30, drone.speed + deltaSpeed));
       drone.timestamp = new Date();
 
       // Add to trail (keep last 20 points)

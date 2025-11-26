@@ -47,7 +47,7 @@ def parse_uart_data(line):
     try:
         parts = line.strip().split(',')
         
-        # Formato drone: drone_id,lat,lon,alt
+        # Formato drone: drone_id,lat,lon,alt,name
         if parts[0].startswith('DRN-'):
             return {
                 'type': 'drone',
@@ -55,7 +55,7 @@ def parse_uart_data(line):
                 'lat': float(parts[1]),
                 'lon': float(parts[2]),
                 'alt': float(parts[3]),
-                'speed': float(parts[4]) if len(parts) > 4 else 0,
+                'name': parts[4] if len(parts) > 4 else parts[0],
                 'timestamp': time.time()
             }
         
@@ -85,13 +85,18 @@ def uart_reader():
             # Simular datos de prueba
             import random
             drone_id = f"DRN-{random.randint(1, 3):03d}"
+            drone_names = {
+                'DRN-001': 'Halcón 1',
+                'DRN-002': 'Águila 2',
+                'DRN-003': 'Cóndor 3'
+            }
             data = {
                 'type': 'drone',
                 'drone_id': drone_id,
+                'name': drone_names.get(drone_id, drone_id),
                 'lat': 19.4326 + random.uniform(-0.01, 0.01),
                 'lon': -99.1332 + random.uniform(-0.01, 0.01),
                 'alt': random.randint(50, 200),
-                'speed': random.randint(10, 30),
                 'timestamp': time.time()
             }
             active_drones[drone_id] = data
@@ -290,9 +295,9 @@ sudo systemctl status drone-tracker
 
 ### Drones
 ```
-DRN-001,19.4326,-99.1332,120,15
+DRN-001,19.4326,-99.1332,120,Halcón 1
 ```
-Formato: `drone_id,lat,lon,alt,speed`
+Formato: `drone_id,lat,lon,alt,name`
 
 ### Estaciones
 ```
