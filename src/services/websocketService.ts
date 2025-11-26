@@ -39,9 +39,13 @@ export class WebSocketService {
 
     this.socket.on('initial_drones', (drones: any[]) => {
       const parsedDrones = drones.map(d => ({
-        ...d,
+        drone_id: d.drone_id,
+        name: d.name || d.drone_id,
+        lat: d.lat,
+        lon: d.lon,
+        alt: d.alt,
         timestamp: new Date(d.timestamp * 1000),
-        trail: [[d.lat, d.lon]]
+        trail: [[d.lat, d.lon] as [number, number]]
       }));
       this.notifyDrones(parsedDrones);
     });
@@ -51,12 +55,16 @@ export class WebSocketService {
     });
 
     this.socket.on('drone_update', (drone: any) => {
-      const parsedDrone = {
-        ...drone,
+      const parsedDrone: DroneData = {
+        drone_id: drone.drone_id,
+        name: drone.name || drone.drone_id,
+        lat: drone.lat,
+        lon: drone.lon,
+        alt: drone.alt,
         timestamp: new Date(drone.timestamp * 1000),
-        trail: [[drone.lat, drone.lon]]
+        trail: [[drone.lat, drone.lon] as [number, number]]
       };
-      // Note: In production, you'd merge this with existing drones
+      // Note: This sends individual updates, the component merges them
       this.notifyDrones([parsedDrone]);
     });
 

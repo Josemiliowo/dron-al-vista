@@ -109,8 +109,8 @@ export const MapView = ({ drones, stations }: MapViewProps) => {
         .bindPopup(`
           <div class="p-2">
             <h3 class="font-bold mb-2">${drone.drone_id}</h3>
+            <p class="text-sm"><strong>Nombre:</strong> ${drone.name}</p>
             <p class="text-sm"><strong>Altitud:</strong> ${Math.round(drone.alt)}m</p>
-            <p class="text-sm"><strong>Velocidad:</strong> ${Math.round(drone.speed)} km/h</p>
             <p class="text-sm"><strong>Lat:</strong> ${drone.lat.toFixed(4)}</p>
             <p class="text-sm"><strong>Lon:</strong> ${drone.lon.toFixed(4)}</p>
             <p class="text-sm"><strong>Última actualización:</strong> ${drone.timestamp.toLocaleTimeString()}</p>

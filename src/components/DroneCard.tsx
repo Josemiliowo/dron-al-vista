@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, Activity, Wind } from "lucide-react";
+import { MapPin, Clock, Activity, Tag } from "lucide-react";
 import { DroneData } from "@/services/mockDroneService";
 
 interface DroneCardProps {
@@ -43,10 +43,10 @@ export const DroneCard = ({ drone, isNew }: DroneCardProps) => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Wind className="h-4 w-4 text-muted-foreground" />
+          <Tag className="h-4 w-4 text-muted-foreground" />
           <div>
-            <p className="text-xs text-muted-foreground">Velocidad</p>
-            <p className="text-sm font-semibold text-foreground">{Math.round(drone.speed)} km/h</p>
+            <p className="text-xs text-muted-foreground">Nombre</p>
+            <p className="text-sm font-semibold text-foreground">{drone.name}</p>
           </div>
         </div>
       </div>

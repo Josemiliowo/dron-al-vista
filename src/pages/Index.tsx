@@ -1,37 +1,57 @@
 import { useEffect, useState } from "react";
-import { Radio, Activity, Wind, Clock } from "lucide-react";
+import { Radio, Activity, Clock } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { DroneCard } from "@/components/DroneCard";
 import { MapView } from "@/components/MapView";
 import { Badge } from "@/components/ui/badge";
-import { mockDroneService, DroneData, StationData } from "@/services/mockDroneService";
+import { websocketService } from "@/services/websocketService";
+import { DroneData, StationData } from "@/services/mockDroneService";
 
 const Index = () => {
   const [drones, setDrones] = useState<DroneData[]>([]);
   const [stations, setStations] = useState<StationData[]>([]);
-  const [isConnected, setIsConnected] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const handleUpdate = (updatedDrones: DroneData[], updatedStations: StationData[]) => {
-      setDrones(updatedDrones);
+    // Conectar al backend real
+    websocketService.connect('http://192.168.4.1:5000');
+    
+    websocketService.subscribeDrones((updatedDrones) => {
+      setDrones(prevDrones => {
+        const droneMap = new Map(prevDrones.map(d => [d.drone_id, d]));
+        
+        updatedDrones.forEach(newDrone => {
+          const existingDrone = droneMap.get(newDrone.drone_id);
+          if (existingDrone) {
+            // Mantener el trail existente y agregar nuevo punto
+            const newTrail: [number, number][] = [
+              ...existingDrone.trail, 
+              [newDrone.lat, newDrone.lon] as [number, number]
+            ].slice(-20);
+            newDrone.trail = newTrail;
+          }
+          droneMap.set(newDrone.drone_id, newDrone);
+        });
+        
+        return Array.from(droneMap.values());
+      });
+    });
+    
+    websocketService.subscribeStations((updatedStations) => {
       setStations(updatedStations);
-    };
-
-    mockDroneService.subscribe(handleUpdate);
-    mockDroneService.start();
+    });
+    
+    websocketService.subscribeConnected((status) => {
+      setIsConnected(status);
+    });
 
     return () => {
-      mockDroneService.unsubscribe(handleUpdate);
-      mockDroneService.stop();
+      websocketService.disconnect();
     };
   }, []);
 
   const avgAltitude = drones.length > 0 
     ? Math.round(drones.reduce((sum, d) => sum + d.alt, 0) / drones.length)
-    : 0;
-
-  const avgSpeed = drones.length > 0
-    ? Math.round(drones.reduce((sum, d) => sum + d.speed, 0) / drones.length)
     : 0;
 
   const lastDetection = drones.length > 0
@@ -62,7 +82,7 @@ const Index = () => {
       {/* Main Content */}
       <div className="p-6">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <StatsCard
             title="Detecciones Totales"
             value={drones.length}
@@ -73,12 +93,6 @@ const Index = () => {
             title="Altitud Promedio"
             value={`${avgAltitude}m`}
             icon={Activity}
-            iconColor="text-primary"
-          />
-          <StatsCard
-            title="Velocidad Promedio"
-            value={`${avgSpeed} km/h`}
-            icon={Wind}
             iconColor="text-primary"
           />
           <StatsCard
