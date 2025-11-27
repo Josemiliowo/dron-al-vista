@@ -14,17 +14,21 @@ export class WebSocketService {
     connected: []
   };
 
-  connect(url: string = 'http://192.168.4.1:5000') {
+  connect(url?: string) {
+    // Usar la misma URL del navegador si no se especifica
+    const backendUrl = url || window.location.origin;
+    console.log('Connecting to:', backendUrl);
     if (this.socket?.connected) {
       console.log('Already connected');
       return;
     }
 
-    this.socket = io(url, {
+    this.socket = io(backendUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5
+      reconnectionAttempts: Infinity,
+      timeout: 10000
     });
 
     this.socket.on('connect', () => {

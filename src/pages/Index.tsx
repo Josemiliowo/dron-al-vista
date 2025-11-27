@@ -13,8 +13,8 @@ const Index = () => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Conectar al backend real
-    websocketService.connect('http://192.168.4.1:5000');
+    // Conectar al backend real (usa la URL actual automáticamente)
+    websocketService.connect();
     
     websocketService.subscribeDrones((updatedDrones) => {
       setDrones(prevDrones => {
