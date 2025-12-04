@@ -24,7 +24,7 @@ interface MapViewProps {
 export const MapView = ({ drones, stations }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
-  const droneMarkers = useRef<Map<string, L.CircleMarker>>(new Map());
+  const droneMarkers = useRef<Map<string, L.Marker>>(new Map());
   const droneTrails = useRef<Map<string, L.Polyline>>(new Map());
   const stationMarkers = useRef<Map<string, L.Marker>>(new Map());
 
@@ -95,28 +95,38 @@ export const MapView = ({ drones, stations }: MapViewProps) => {
       let marker = droneMarkers.current.get(drone.drone_id);
       let trail = droneTrails.current.get(drone.drone_id);
 
-      if (!marker) {
-        // Create drone marker with size based on altitude
-        const size = 15 + (drone.alt / 200) * 30; // Size between 15-45px
-        marker = L.circleMarker([drone.lat, drone.lon], {
-          radius: size / 2,
-          fillColor: '#3b82f6',
-          color: '#1e40af',
-          weight: 2,
-          opacity: 0.8,
-          fillOpacity: 0.6
-        })
-        .bindPopup(`
-          <div class="p-2">
-            <h3 class="font-bold mb-2">${drone.drone_id}</h3>
-            <p class="text-sm"><strong>Nombre:</strong> ${drone.name}</p>
-            <p class="text-sm"><strong>Altitud:</strong> ${Math.round(drone.alt)}m</p>
-            <p class="text-sm"><strong>Lat:</strong> ${drone.lat.toFixed(4)}</p>
-            <p class="text-sm"><strong>Lon:</strong> ${drone.lon.toFixed(4)}</p>
-            <p class="text-sm"><strong>Última actualización:</strong> ${drone.timestamp.toLocaleTimeString()}</p>
+      // Create custom drone icon
+      const droneIcon = L.divIcon({
+        html: `
+          <div class="relative">
+            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg border-2 border-white">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z"/>
+              </svg>
+            </div>
+            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-24 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-semibold text-center whitespace-nowrap shadow">
+              ${drone.name}
+            </div>
           </div>
-        `)
-        .addTo(map.current!);
+        `,
+        className: 'custom-drone-icon',
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+      });
+
+      if (!marker) {
+        marker = L.marker([drone.lat, drone.lon], { icon: droneIcon })
+          .bindPopup(`
+            <div class="p-2">
+              <h3 class="font-bold mb-2">${drone.drone_id}</h3>
+              <p class="text-sm"><strong>Nombre:</strong> ${drone.name}</p>
+              <p class="text-sm"><strong>Altitud:</strong> ${Math.round(drone.alt)}m</p>
+              <p class="text-sm"><strong>Lat:</strong> ${drone.lat.toFixed(4)}</p>
+              <p class="text-sm"><strong>Lon:</strong> ${drone.lon.toFixed(4)}</p>
+              <p class="text-sm"><strong>Última actualización:</strong> ${drone.timestamp.toLocaleTimeString()}</p>
+            </div>
+          `)
+          .addTo(map.current!);
 
         droneMarkers.current.set(drone.drone_id, marker);
 
@@ -130,10 +140,8 @@ export const MapView = ({ drones, stations }: MapViewProps) => {
         
         droneTrails.current.set(drone.drone_id, trail);
       } else {
-        // Update existing marker position and size
+        // Update existing marker position
         marker.setLatLng([drone.lat, drone.lon]);
-        const size = 15 + (drone.alt / 200) * 30;
-        marker.setRadius(size / 2);
         
         // Update trail
         if (trail) {
@@ -160,7 +168,8 @@ export const MapView = ({ drones, stations }: MapViewProps) => {
     <div className="relative w-full h-full rounded-lg overflow-hidden border border-border">
       <div ref={mapContainer} className="absolute inset-0" />
       <style>{`
-        .custom-station-icon {
+        .custom-station-icon,
+        .custom-drone-icon {
           background: transparent !important;
           border: none !important;
         }
